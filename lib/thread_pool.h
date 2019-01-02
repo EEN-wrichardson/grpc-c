@@ -8,9 +8,10 @@
 
 #include <strings.h>
 #include <sys/queue.h>
+#include <pthread.h>
 #include <grpc/support/alloc.h>
 #include <grpc/support/log.h>
-#include <grpc/support/thd.h>
+#include <grpc/support/thd_id.h>
 #include <grpc/support/sync.h>
 #include <grpc/support/time.h>
 
@@ -35,7 +36,7 @@ struct grpc_c_thread_callback_t {
  * Structure to hold thread details
  */
 struct grpc_c_thread_t {
-    gpr_thd_id gct_thread;
+    pthread_t p_thread;
     gpr_mu gct_lock;
     grpc_c_thread_pool_t *gct_pool;
     TAILQ_ENTRY(grpc_c_thread_t) gct_threads;/* Queue of threads */

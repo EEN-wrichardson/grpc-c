@@ -108,15 +108,15 @@ class FileGenerator {
  private:
   const FileDescriptor* file_;
 
-  scoped_array<scoped_ptr<c::MessageGenerator> > message_generators_;
-  scoped_array<scoped_ptr<GrpcCMessageGenerator> > grpc_c_message_generators_;
-  scoped_array<scoped_ptr<MessagePackUnpackGenerator> > message_pack_unpack_generators_;
-  scoped_array<scoped_ptr<c::EnumGenerator> > enum_generators_;
-  scoped_array<scoped_ptr<GrpcCServiceGenerator> > service_generators_;
-  scoped_array<scoped_ptr<c::ExtensionGenerator> > extension_generators_;
+  std::unique_ptr<std::unique_ptr<c::MessageGenerator>[] > message_generators_;
+  std::unique_ptr<std::unique_ptr<GrpcCMessageGenerator>[] > grpc_c_message_generators_;
+  std::unique_ptr<std::unique_ptr<MessagePackUnpackGenerator>[] > message_pack_unpack_generators_;
+  std::unique_ptr<std::unique_ptr<c::EnumGenerator>[] > enum_generators_;
+  std::unique_ptr<std::unique_ptr<GrpcCServiceGenerator>[] > service_generators_;
+  std::unique_ptr<std::unique_ptr<c::ExtensionGenerator>[] > extension_generators_;
 
   // E.g. if the package is foo.bar, package_parts_ is {"foo", "bar"}.
-  vector<string> package_parts_;
+  std::vector<string> package_parts_;
 
   GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(FileGenerator);
 };

@@ -124,7 +124,7 @@ class GrpcCMessageGenerator {
  private:
   const Descriptor* descriptor_;
   string dllexport_decl_;
-  scoped_array<scoped_ptr<GrpcCMessageGenerator> > grpc_c_nested_generators_;
+  std::unique_ptr<std::unique_ptr<GrpcCMessageGenerator>[] > grpc_c_nested_generators_;
 };
 
 }  // namespace grpc_c

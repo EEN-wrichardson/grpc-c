@@ -4,12 +4,13 @@
  */
 
 #include "thread_pool.h"
+#include <errno.h>
 
 /*
  * Thread function that will wait for work and execute callbacks from callback
  * queue when notified
  */
-static void 
+static void *
 gc_thread_func (void *arg)
 {
     grpc_c_thread_pool_t *pool;
@@ -72,6 +73,8 @@ gc_thread_func (void *arg)
      * Add this thread to list of dead threads so we can join them
      */
     TAILQ_INSERT_TAIL(&pool->gctp_dead_threads, gcthread, gct_threads);
+
+    return NULL;
 }
 
 /*
@@ -106,7 +109,7 @@ gc_delete_threads (grpc_c_thread_pool_t *pool)
     struct grpc_c_thread_t *thread;
 
     while (pool->gctp_dead_threads.tqh_first != NULL) {
-	gpr_thd_join(pool->gctp_dead_threads.tqh_first->gct_thread);
+	pthread_join(pool->gctp_dead_threads.tqh_first->p_thread,NULL);
 	thread = pool->gctp_dead_threads.tqh_first;
 	TAILQ_REMOVE(&pool->gctp_dead_threads, 
 		     pool->gctp_dead_threads.tqh_first, gct_threads);
@@ -158,10 +161,9 @@ grpc_c_thread_pool_add (grpc_c_thread_pool_t *pool,
 	pool->gctp_nthreads++;
 	gcthread->gct_pool = pool;
 	gpr_mu_init(&gcthread->gct_lock);
-	gpr_thd_options toptions = gpr_thd_options_default();
-	if (!gpr_thd_new(&gcthread->gct_thread, gc_thread_func, 
-			 (void *)gcthread, &toptions)) {
-	    gpr_log(GPR_ERROR, "Failed to create thread");
+	if (pthread_create(&gcthread->p_thread, NULL, gc_thread_func, 
+			 (void *)gcthread)) {
+	    gpr_log(GPR_ERROR, "Failed to create thread %d", errno);
 	    return 1;
 	}
     } else {
