@@ -28,8 +28,8 @@ foo__greeter__say_hello_cb (grpc_c_context_t *context)
      * Read incoming message into h
      */
     if (context->gcc_stream->read(context, (void **)&h, 0, -1)) {
-	printf("Failed to read data from client\n");
-	exit(1);
+        printf("Failed to read data from client\n");
+        exit(1);
     }
 
     /*
@@ -75,8 +75,8 @@ main (int argc, char **argv)
     int i = 0;
 
     if (argc < 2) {
-	fprintf(stderr, "Missing socket path argument\n");
-	exit(1);
+        fprintf(stderr, "Missing socket path argument\n");
+        exit(1);
     }
 
     signal(SIGINT, sigint_handler);
@@ -91,8 +91,8 @@ main (int argc, char **argv)
      */
     test_server = grpc_c_server_create(argv[1], NULL, NULL);
     if (test_server == NULL) {
-	printf("Failed to create server\n");
-	exit(1);
+        printf("Failed to create server\n");
+        exit(1);
     }
 
     grpc_c_server_add_insecure_http2_port(test_server, "127.0.0.1:3000");

@@ -5,5 +5,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
+AM_CXXFLAGS=-std=c++11
+
 SUBDIRS = compiler lib
 dist_doc_DATA = README.md

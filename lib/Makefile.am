@@ -22,6 +22,8 @@ libgrpc_c_la_SOURCES = \
     trace.c
 
 AM_CFLAGS = \
+    -I/opt/een/include \
+    -I/usr/local/include \
     -I${srcdir} \
     -I${srcdir}/h \
     -I${srcdir}/../third_party/protobuf-c

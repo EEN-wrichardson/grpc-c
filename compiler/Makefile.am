@@ -35,7 +35,9 @@ protoc_gen_grpc_c_LDADD = \
     ${prefix}/lib/libprotoc.a
 
 AM_CXXFLAGS = \
+    -std=c++11 \
     -I${srcdir} \
+    -I/opt/een/include \
     -I${srcdir}/../third_party/protobuf-c \
     -I${srcdir}/../third_party/protobuf-c/protobuf-c
 

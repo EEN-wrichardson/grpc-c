@@ -189,18 +189,23 @@ void grpc_c_shutdown (void);
 void grpc_c_hook_init (grpc_c_hook_t *hook);
 
 /*
+ * completion queue implmenentation type
+ */
+typedef enum grpc_c_exec_type_s {
+	GRPC_EXEC_SYNCHRONOUS,   	/* grpc completion queue pluck method */
+    GRPC_EXEC_ASYNCHRONOUS,	    /* grpc completion queue next method */
+} grpc_c_exec_type_t;
+
+/*
  * Definition for RPC method structure
  */
 struct grpc_c_method_t {
-    void *gcm_tag;			/* Tag returned by 
-					   grpc_server_register_method() */
+    void *gcm_tag;			/* Tag returned by grpc_server_register_method() */
     char *gcm_name;			/* URL for this RPC */
-    int gcm_method_id;			/* Index of this method in the list of 
-					   all registered methods */
-    int gcm_client_streaming;		/* Flag to indicate if client is 
-					   streaming */
-    int gcm_server_streaming;		/* Flag to indicate if server is 
-					   streaming */
+    int gcm_method_id;			/* Index of this method in the list of all registered methods */
+    int gcm_client_streaming;		/* Flag to indicate if client is streaming */
+    int gcm_server_streaming;		/* Flag to indicate if server is streaming */
+
     LIST_ENTRY(grpc_c_method_t) gcm_list;
 					/* List of all the registered methods */
 };
@@ -212,8 +217,7 @@ typedef enum grpc_c_state_s {
     GRPC_C_OP_START,		/* Started executing operations */
     GRPC_C_SERVER_CALLBACK_WAIT,    /* Waiting to call RPC handler in server */
     GRPC_C_SERVER_CALLBACK_START,   /* Called RPC handler */
-    GRPC_C_SERVER_CALLBACK_DONE,    /* RPC handler finished execution and 
-				       returned */
+    GRPC_C_SERVER_CALLBACK_DONE,    /* RPC handler finished execution and returned */
     GRPC_C_SERVER_CONTEXT_CLEANUP,  /* Context is cleaned up */
     GRPC_C_SERVER_CONTEXT_NOOP,	/* Context is cleaned up */
     GRPC_C_READ_DATA_START,	/* Started reading incoming data */
@@ -234,8 +238,8 @@ typedef enum grpc_c_state_s {
  */
 struct grpc_c_client_s {
     grpc_channel *gcc_channel;	    /* Underlying grpc channel to host */
-    grpc_completion_queue *gcc_cq;  /* Completion queue associated with this 
-				       client */
+    grpc_completion_queue *gcc_cq;  /* Completion queue associated with this client */
+    grpc_c_exec_type_t gcm_rpc_exec_type;  /* flag for sync/async for completion_queue type */
     grpc_completion_queue *gcc_channel_connectivity_cq;
 				    /* Completion queue to receive channel
 				       connectivity change events */
@@ -332,8 +336,8 @@ struct grpc_c_context_s {
     grpc_byte_buffer *gcc_payload;		/* Payload holder */
     grpc_op *gcc_ops;				/* Array of grpc operations */
     grpc_byte_buffer **gcc_ops_payload;		/* Payload per operation */
-    grpc_completion_queue *gcc_cq;		/* Completion queue associated 
-						   with this context */
+    grpc_completion_queue *gcc_cq;		/* Completion queue associated with this context */
+	grpc_c_exec_type_t gcm_rpc_exec_type;  /* flag for sync/async for completion_queue type */
     gpr_timespec gcc_deadline;			/* Deadline for operations in 
 						   this context */
     grpc_c_metadata_array_t *gcc_metadata;	/* Metadata array to send 
@@ -572,6 +576,7 @@ struct grpc_c_server_s {
     char *gcs_host;			    /* Server hostname */
     grpc_server *gcs_server;		    /* Grpc server */
     grpc_completion_queue *gcs_cq;	    /* Server completion queue */
+    grpc_c_exec_type_t gcm_rpc_exec_type;  /* flag for sync/async for completion_queue type */
     grpc_c_method_funcs_t *gcs_method_funcs;/* Array of methods */
     LIST_HEAD(grpc_c_method_list_head, grpc_c_method_t) gcs_method_list_head;
     int gcs_method_count;		    /* Number of registered methods */
@@ -768,7 +773,7 @@ int grpc_c_client_request_unary (grpc_c_client_t *client,
 int grpc_c_client_request_sync (grpc_c_client_t *client, 
 				grpc_c_metadata_array_t *mdarray, uint32_t flags, 
 				grpc_c_context_t **context, const char *method, 
-				void *inpupt, int client_streaming, 
+				void *input, int client_streaming, 
 				int server_streaming, 
 				grpc_c_method_data_pack_t *input_packer, 
 				grpc_c_method_data_unpack_t *input_unpacker, 

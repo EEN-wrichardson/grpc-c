@@ -13,8 +13,8 @@ int
 main (int argc, char **argv) 
 {
     if (argc < 2) {
-	fprintf(stderr, "Too few arguments\n");
-	exit(1);
+        fprintf(stderr, "Too few arguments\n");
+        exit(1);
     }
 
     /*
@@ -26,26 +26,25 @@ main (int argc, char **argv)
      * Create a client object with client name as foo client to be talking to
      * a insecure server
      */
-    grpc_c_client_t *client = grpc_c_client_init(argv[1], "foo client", NULL, 
-						 NULL);
+    grpc_c_client_t *client = grpc_c_client_init(argv[1], "foo client", NULL, NULL);
 
     /*
      * Create a hello request message and call RPC
      */
-    foo__HelloRequest h;
-    foo__hello_request__init(&h);
-    foo__HelloReply *r;
+    foo__HelloRequest input;
+    foo__hello_request__init(&input);
+    foo__HelloReply *output;
 
     char str[BUFSIZ];
     snprintf(str, BUFSIZ, "world");
-    h.name = str;
+    input.name = str;
 
     /*
      * This will invoke a blocking RPC
      */
-    int status = foo__greeter__say_hello(client, NULL, 0, &h, &r, NULL, -1);
-    if (r) {
-	printf("Got back: %s\n", r->message);
+    int status = foo__greeter__say_hello(client, NULL, 0, &input, &output, NULL, 5000);
+    if (output) {
+        printf("\n\nGot back: %s\n\n", output->message);
     }
-    printf("Finished with %d\n", status);
+    printf("\n\nFinished with %d\n\n", status);
 }
